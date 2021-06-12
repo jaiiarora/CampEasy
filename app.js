@@ -32,8 +32,19 @@ app.get('/makecampground', async(req,res)=>{
     const camp=new Campground({title:"Test Campground", description:"Cheap Camping"});
     await camp.save();
     res.send(camp);
-})
+});
 //tested and works connected database, works successfully
+
+app.get('/campgrounds/:id', async(req,res)=>{
+    
+    const campground= await Campground.findById(req.params.id);
+    res.render('campgrounds/show', {campground});
+});
+
+app.get('/campgrounds', async(req,res)=>{
+    const campgrounds=await (Campground.find({}));
+    res.render('campgrounds/index', {campgrounds});
+})
 
 
 app.get('/')
