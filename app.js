@@ -3,6 +3,7 @@ const mongoose=require("mongoose");
 const path=require('path');
 const bp = require("body-parser");
 const methodOverride=require("method-override");
+const ejsMate=require('ejs-mate');
 //setting up ejs engine
 const Campground=require('./models/campground');
 mongoose.connect("mongodb://localhost:27017/camp-easy",{
@@ -19,6 +20,7 @@ db.once("open",()=>{
 
 
 const app=express();
+app.engine('ejs',ejsMate);
 app.use(bp.json());
 app.use(bp.urlencoded({ extended: true }));
 app.set("view engine", 'ejs');
@@ -52,12 +54,11 @@ app.get('/campgrounds/:id', async(req,res)=>{
 });
 
 
-
-
-app.get('/campgrounds', async(req,res)=>{
-    const campgrounds=await (Campground.find({}));
-    res.render('campgrounds/index', {campgrounds});
+app.get('/campgrounds', async (req, res) => {
+    const campgrounds = await Campground.find({});
+    res.render('campgrounds/index', { campgrounds })
 });
+
 
 app.get('/campgrounds/new', async()=>{
     res.render('campgrounds/new');
