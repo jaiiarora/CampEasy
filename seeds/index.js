@@ -23,11 +23,15 @@ const seedDB= async ()=>{
     for (let i=0; i<50;i++)
     {
         const random1000=Math.floor(Math.random()*1000);
+        const price=Math.floor(Math.random()*300);
         console.log(cities[random1000].city);
         //mark the backticks here
         const randCamp = new Campground({
-        location: `${cities[random1000].city}, ${cities[random1000].state}`, title:`${sample(descriptors)} ${sample(places)}`});
-
+        location: `${cities[random1000].city}, ${cities[random1000].state}`, title:`${sample(descriptors)} ${sample(places)}`,
+        image:'https://source.unsplash.com/collection/483251',
+        description:'Hello Gamers',
+        price:price
+    });
         await (randCamp.save());
     }
 }
