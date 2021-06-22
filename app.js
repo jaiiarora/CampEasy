@@ -8,9 +8,10 @@ const catchAsync=require('./utils/catchAsync');
 const Joi=require('joi');
 //setting up ejs engine
 const Campground=require('./models/campground');
-const { campgroundSchema } = require('./schemas.js')
+const { campgroundSchema, reviewSchema } = require('./schemas.js')
 const ExpressError=require('./utils/ExpressError');
 const { join } = require("path");
+const Review=require('./models/review')
 mongoose.connect("mongodb://localhost:27017/camp-easy",{
     useNewUrlParser:true,
     useCreateIndex: true,
@@ -42,6 +43,16 @@ const validateCampground = (req, res, next) => {
     }
 };
 
+const validateReview = (req, res, next) => {
+    const { error } = reviewSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+};
+
 app.get('/', (req,res)=>{
     res.send("Hello From CampEasy");
 })
@@ -63,7 +74,8 @@ app.get('/campgrounds/:id/edit', catchAsync(async(req,res)=>{
 }));
 
 app.get('/campgrounds/:id',catchAsync( async(req,res)=>{
-    const campground= await Campground.findById(req.params.id);
+    const campground= await Campground.findById(req.params.id).populate('reviews');
+    console.log('Campground');
     res.render('campgrounds/show', {campground});
 }));
 
@@ -96,7 +108,16 @@ app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next)=>
        await campground.save();
         res.redirect(`/campgrounds/${campground._id}`)    
 }));
-    
+
+app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async(req,res, next)=>{
+    const campground=await(Campground.findById(req.params.id));
+    const review=new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
+}));
+
 app.all('*', (req,res,next)=>{
     next(new ExpressError('Page not Found', 404));
 })
